@@ -29,6 +29,10 @@ def get_performance_data():
         if data.empty:
             continue
         
+        # FIX: Flatten MultiIndex columns if present (handles newer yfinance version quirks)
+        if isinstance(data.columns, pd.MultiIndex):
+            data.columns = data.columns.get_level_values(0)
+            
         # Core Safety Fix: Strip timezone info so all asset dates compare perfectly
         data.index = data.index.tz_localize(None)
         
