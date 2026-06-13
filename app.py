@@ -13,20 +13,19 @@ st.write("Real-time updates across major asset classes.")
 assets = {
     "Nifty 50": "^NSEI",
     "Nifty Bank": "^NSEBANK",
-    "USD-INR": "INR=X",
-    "Gold": "GC=F",
-    "Silver": "SI=F",
-    "Crude Oil": "CL=F",
-    # --- New Assets Added Below ---
-    "Bitcoin": "BTC-USD",
-    "Ethereum": "ETH-USD",
-    "Dogecoin": "DOGE-USD",
     "Nasdaq": "^IXIC",
     "S&P 500": "^GSPC",
     "Nikkei 225": "^N225",
     "Hang Seng": "^HSI",
     "KOSPI": "^KS11",
-    "Karachi 100": "^KSE"
+    "Karachi 100": "^KSE",
+    "USD-INR": "INR=X",
+    "Gold": "GC=F",
+    "Silver": "SI=F",
+    "Crude Oil": "CL=F",
+    "Bitcoin": "BTC-USD",
+    "Ethereum": "ETH-USD",
+    "Dogecoin": "DOGE-USD"
 }
 
 
