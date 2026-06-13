@@ -311,7 +311,6 @@ fig_heat = go.Figure(data=go.Heatmap(
     z=heat_values,
     x=short_xlabels,           # ← short labels (1D, 1W, 1M …)
     y=heat_df.index.tolist(),
-    customdata=np.array([[p for p in period_labels]] * n_assets),
     colorscale=[
         [0.00, "#ff3333"],
         [0.45, "#4a1212"],
@@ -325,11 +324,9 @@ fig_heat = go.Figure(data=go.Heatmap(
     text=np.round(heat_values, 2),
     texttemplate="%{text:+.2f}%",
     textfont={"size": 10, "color": "#ffffff"},   # slightly smaller for mobile
-    hovertemplate="%{y}<br>%{customdata}: %{z:+.2f}%<extra></extra>",
+    hovertemplate="%{y}<br>%{x}: %{z:+.2f}%<extra></extra>",
     colorbar=dict(
         title="Return %",
-        titlefont=dict(size=11),
-        tickfont=dict(size=10),
         thickness=12,          # thinner colorbar — saves space on mobile
         len=0.85,
     ),
