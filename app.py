@@ -399,7 +399,7 @@ def style_returns(val):
     color = "#4ade80" if val >= 0 else "#f87171"
     return f"color: {color}; font-weight: 600;"
 
-styled = display_df.style.applymap(style_returns, subset=period_labels)
+styled = display_df.style.map(style_returns, subset=period_labels)
 styled = styled.format({c: "{:+.2f}%" for c in period_labels}, na_rep="N/A")
 st.dataframe(styled, use_container_width=True, height=560)
 
