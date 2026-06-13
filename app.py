@@ -16,45 +16,48 @@ assets = {
     "USD-INR": "INR=X",
     "Gold": "GC=F",
     "Silver": "SI=F",
-    "Crude Oil": "CL=F"
+    "Crude Oil": "CL=F",
+    # --- New Assets Added Below ---
+    "Bitcoin": "BTC-USD",
+    "Ethereum": "ETH-USD",
+    "Dogecoin": "DOGE-USD",
+    "Nasdaq": "^IXIC",
+    "S&P 500": "^GSPC",
+    "Nikkei 225": "^N225",
+    "Hang Seng": "^HSI",
+    "KOSPI": "^KS11",
+    "Karachi 100": "^KSE"
 }
+
 
 @st.cache_data(ttl=3600)  # Cache data for 1 hour to keep it fast
 def get_performance_data():
     table_data = []
-    
+
     for name, ticker in assets.items():
-        # Fetch up to 12 years of data to ensure enough history for the 10-year lookback
-        data = yf.download(ticker, start=datetime.now() - timedelta(days=12*365), end=datetime.now(), progress=False)
+        # Fetch up to 11 years to safely calculate 10-year lookbacks
+        data = yf.download(ticker, start=datetime.now() - timedelta(days=11 * 365), end=datetime.now(), progress=False)
         if data.empty:
             continue
-        
-        # FIX: Flatten MultiIndex columns if present (handles newer yfinance version quirks)
-        if isinstance(data.columns, pd.MultiIndex):
-            data.columns = data.columns.get_level_values(0)
-            
-        # Core Safety Fix: Strip timezone info so all asset dates compare perfectly
-        data.index = data.index.tz_localize(None)
-        
-        current_price = float(data['Close'].iloc[-1])
-        
-        # Bulletproof historical lookup
+
+        current_price = data['Close'].iloc[-1].item()
+
+        # Helper function to extract historical prices safely
         def calc_return(days_ago):
             try:
-                target_date = datetime.now() - timedelta(days=days_ago)
-                # Filter for all trading days that occurred on or before the target date
-                past_trading_days = data[data.index <= target_date]
-                if past_trading_days.empty:
-                    return "N/A"
-                # Grab the closest available trading day's closing price
-                past_price = float(past_trading_days['Close'].iloc[-1])
+                # Use the latest date in the data's index to match timezones safely
+                target_date = data.index[-1] - pd.Timedelta(days=days_ago)
+                
+                # Get the last available price on or before that target date
+                past_price = data['Close'].loc[:target_date].iloc[-1].item()
+                
                 return f"{((current_price - past_price) / past_price) * 100:+.2f}%"
             except:
                 return "N/A"
 
         # Safe extraction for last trading day change
         try:
-            prev_close = float(data['Close'].iloc[-2])
+            prev_close = data['Close'].iloc[-2].item()
             day_return = f"{((current_price - prev_close) / prev_close) * 100:+.2f}%"
         except:
             day_return = "N/A"
@@ -66,14 +69,15 @@ def get_performance_data():
             "1 Week": calc_return(7),
             "1 Month": calc_return(30),
             "1 Year": calc_return(365),
-            "2 Year": calc_return(2*365),
-            "3 Year": calc_return(3*365),
-            "5 Year": calc_return(5*365),
-            "10 Year": calc_return(10*365)
+            "2 Year": calc_return(2 * 365),
+            "3 Year": calc_return(3 * 365),
+            "5 Year": calc_return(5 * 365),
+            "10 Year": calc_return(10 * 365)
         })
-        
+
     return pd.DataFrame(table_data)
 
+
 df = get_performance_data()
-st.dataframe(df.set_index("Asset Class"), use_container_width=True)
+st.dataframe(df.set_index("Asset Class"), width="stretch")
 st.caption("Data sourced automatically via Yahoo Finance. Absolute returns calculated relative to current date.")
